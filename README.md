@@ -1,0 +1,41 @@
+# Fairview Portal – Mobile App
+
+React Native (Expo + TypeScript) companion to the ExtraCare / Fairview School web portal. It talks to the **same backend** as the web app, so logins and data are shared.
+
+## Status
+
+| Role | Screens |
+|------|---------|
+| Parent | Dashboard, My children (attendance, grade, assignments), Pay fees (Paystack/Flutterwave/Remita) |
+| Student | Dashboard (today's lessons), Exam portal list, My progress |
+| Super User, Teacher, Admin, others | Coming next |
+
+Exam-taking, report cards, daily reports and push notifications are on the roadmap.
+
+## Run it on your phone (Expo Go)
+
+1. Install **Expo Go** from the Play Store / App Store.
+2. On your computer: `npm install` then `npx expo start`.
+3. Scan the QR code with Expo Go (same Wi-Fi). If your network blocks it, use `npx expo start --tunnel`.
+
+## Configuration
+
+Copy `.env.example` to `.env` to point at another server:
+
+```
+EXPO_PUBLIC_API_URL=https://fairview-portal.onrender.com
+```
+
+`EXPO_PUBLIC_*` values are bundled into the app and visible to anyone, so **never put passwords, tokens or connection strings in them or in any tracked file**. Login tokens are stored on the device in the secure keychain (`expo-secure-store`).
+
+## Project layout
+
+```
+app/            screens (expo-router): login, (app)/ tabs per role
+src/lib/        api client (auto token refresh), auth, role context, theme
+src/components/ shared UI
+```
+
+## Checks
+
+`npm run typecheck`
