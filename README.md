@@ -39,3 +39,18 @@ src/components/ shared UI
 ## Checks
 
 `npm run typecheck`
+
+## Build for Android and iOS (EAS)
+
+One codebase builds both apps in Expo's cloud (no Mac needed for iOS):
+
+```
+npm i -g eas-cli
+eas login
+eas build:configure
+eas build --profile preview --platform android   # installable .apk to test
+eas build --profile production --platform all    # store builds (.aab + iOS)
+eas submit --platform android|ios                # upload to the stores
+```
+
+Accounts needed: Expo (free), Google Play Console (one-time $25), Apple Developer Program ($99/year, required for iOS installs outside Expo Go).
