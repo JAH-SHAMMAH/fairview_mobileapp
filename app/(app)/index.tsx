@@ -136,6 +136,10 @@ export default function Home() {
               <Tile icon="checkbox" label="Mark attendance" color={colors.green} onPress={() => router.push("/mark")} />
               <Tile icon="newspaper" label="News feed" color={colors.indigo} onPress={() => router.push("/feed")} />
             </View>
+            <View style={st.grid}>
+              <Tile icon="create" label="Enter scores" color={colors.violet} onPress={() => router.push("/entry")} />
+              <Tile icon="podium" label="CBT results" color={colors.amber} onPress={() => router.push("/cbt")} />
+            </View>
             <Text style={st.sec}>Today’s lessons</Text>
             {ctx.as_teacher.today_slots.length === 0 ? <Card><Muted>No lessons scheduled today.</Muted></Card> : ctx.as_teacher.today_slots.map((s) => (
               <Card key={s.id}><Text style={st.cn}>{s.subject_name || "Lesson"}</Text><Muted>{s.start_time.slice(0, 5)} – {s.end_time.slice(0, 5)}{s.room ? ` · ${s.room}` : ""}</Muted></Card>

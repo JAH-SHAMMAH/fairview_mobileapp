@@ -25,6 +25,7 @@ function TabsByRole() {
       <Tabs.Screen name="feed" options={{ title: "Feed", tabBarIcon: icon("newspaper", "newspaper-outline") }} />
       <Tabs.Screen name="notices" options={{ title: "Notices", tabBarIcon: icon("notifications", "notifications-outline") }} />
       <Tabs.Screen name="remark/[id]" options={{ href: null, tabBarStyle: { display: "none" } }} />
+      <Tabs.Screen name="entry" options={{ href: null, tabBarStyle: { display: "none" } }} />
       <Tabs.Screen name="practice" options={{ href: null, tabBarStyle: { display: "none" } }} />
       <Tabs.Screen name="exam/[id]" options={{ href: null, tabBarStyle: { display: "none" } }} />
       <Tabs.Screen name="report/[id]" options={{ href: null, tabBarStyle: { display: "none" } }} />
