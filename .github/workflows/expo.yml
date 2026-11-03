@@ -1,0 +1,38 @@
+name: Expo publish / build
+
+# Run from the GitHub app: Actions -> "Expo publish / build" -> Run workflow.
+# Needs one repository secret named EXPO_TOKEN (Settings -> Secrets and variables -> Actions).
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: "What to do"
+        type: choice
+        default: update
+        options:
+          - update         # publish to Expo; open in Expo Go (iPhone + Android)
+          - android-apk    # build an installable Android .apk
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    env:
+      EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+      CI: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Link or create the Expo project
+        run: npx eas-cli@latest init --non-interactive --force
+      - name: Publish update (Expo Go)
+        if: ${{ inputs.action == 'update' }}
+        run: |
+          npx eas-cli@latest update:configure --non-interactive
+          npx eas-cli@latest update --branch preview --message "Mobile app update" --non-interactive
+      - name: Build Android APK
+        if: ${{ inputs.action == 'android-apk' }}
+        run: npx eas-cli@latest build --platform android --profile preview --non-interactive --wait
