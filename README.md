@@ -8,11 +8,11 @@ React Native (Expo + TypeScript) companion to the ExtraCare / Fairview School we
 |------|---------|
 | Parent | Dashboard, My children, report card (term/report pickers), attendance history, pay fees (Paystack/Flutterwave/Remita) |
 | Student | Dashboard (today's lessons), exam room (timer, auto-submit, MCQ / true-false / written), exam list, JAMB/WAEC/NECO + school practice with answer review, progress |
-| Teacher | Dashboard (classes, today's lessons), mark attendance, CBT results (release to students) |
+| Teacher | Dashboard (classes, today's lessons), mark attendance, CBT results (release to students, mark written answers) |
 | Admin / Super User | School overview, mark attendance, School directory (students, teachers, classes; audit log for Super User), news feed (Super User can delete any post) |
 | Everyone | News feed, notices, account / sign out |
 
-Not yet in the app: file-upload exam answers, report entry, marking written answers, push notifications, user management and backups. Use the web portal for those. Nothing here has been tested on a device yet.
+Not yet in the app: file-upload exam answers, report entry, push notifications, user management and backups. Use the web portal for those. Nothing here has been tested on a device yet.
 
 ## Run it on your phone (Expo Go)
 
