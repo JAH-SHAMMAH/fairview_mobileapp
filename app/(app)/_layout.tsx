@@ -10,6 +10,7 @@ function TabsByRole() {
   const { role } = useRole();
   const parent = role === "parent";
   const student = role === "student";
+  const staff = role === "admin" || role === "teacher";
   return (
     <Tabs screenOptions={{ headerShown: false, tabBarActiveTintColor: colors.brand, tabBarInactiveTintColor: colors.muted, tabBarStyle: { backgroundColor: "#fff", borderTopColor: colors.border, height: 64, paddingBottom: 8, paddingTop: 6 }, tabBarLabelStyle: { fontWeight: "700", fontSize: 12 } }}>
       <Tabs.Screen name="index" options={{ title: "Home", tabBarIcon: icon("home", "home-outline") }} />
@@ -17,6 +18,12 @@ function TabsByRole() {
       <Tabs.Screen name="fees" options={{ title: "Fees", href: parent ? undefined : null, tabBarIcon: icon("card", "card-outline") }} />
       <Tabs.Screen name="exams" options={{ title: "Exams", href: student ? undefined : null, tabBarIcon: icon("document-text", "document-text-outline") }} />
       <Tabs.Screen name="progress" options={{ title: "Progress", href: student ? undefined : null, tabBarIcon: icon("trending-up", "trending-up-outline") }} />
+      <Tabs.Screen name="mark" options={{ title: "Attendance", href: staff ? undefined : null, tabBarIcon: icon("checkbox", "checkbox-outline") }} />
+      <Tabs.Screen name="feed" options={{ title: "Feed", tabBarIcon: icon("newspaper", "newspaper-outline") }} />
+      <Tabs.Screen name="notices" options={{ title: "Notices", tabBarIcon: icon("notifications", "notifications-outline") }} />
+      <Tabs.Screen name="exam/[id]" options={{ href: null, tabBarStyle: { display: "none" } }} />
+      <Tabs.Screen name="report/[id]" options={{ href: null, tabBarStyle: { display: "none" } }} />
+      <Tabs.Screen name="attendance/[id]" options={{ href: null, tabBarStyle: { display: "none" } }} />
       <Tabs.Screen name="account" options={{ title: "Account", tabBarIcon: icon("person-circle", "person-circle-outline") }} />
     </Tabs>
   );

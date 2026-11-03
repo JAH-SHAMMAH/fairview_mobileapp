@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { RefreshControl, ScrollView, Text, View } from "react-native";
+import { useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "../../src/lib/api";
-import { Card, Empty, ErrorBox, H1, Loading, Muted, Pill } from "../../src/components/ui";
+import { Button, Card, Empty, ErrorBox, H1, Loading, Muted, Pill } from "../../src/components/ui";
 import { colors } from "../../src/lib/theme";
 
 interface Exam { id: string; title: string; subject_name?: string | null; duration_minutes?: number; start_time?: string | null; end_time?: string | null; status?: string; max_attempts: number; is_live?: boolean }
@@ -11,6 +12,7 @@ interface Attempt { exam_id: string; status: string; score?: number | null; max_
 const KINDS = [{ key: "exam", label: "Exams" }, { key: "test", label: "Tests" }, { key: "mock", label: "Mocks" }] as const;
 
 export default function Exams() {
+  const router = useRouter();
   const [kind, setKind] = useState<(typeof KINDS)[number]["key"]>("exam");
   const list = useQuery<{ items: Exam[] }>({ queryKey: ["my-exams", kind], queryFn: () => api.get("/cbt/exams", { params: { for_me: true, exam_type: kind, page: 1, page_size: 100 } }).then((r) => r.data) });
   const att = useQuery<{ items: Attempt[] }>({ queryKey: ["my-attempts"], queryFn: () => api.get("/cbt/attempts").then((r) => r.data) });
@@ -43,10 +45,10 @@ export default function Exams() {
               <Text style={{ fontSize: 17, fontWeight: "900", color: colors.text }}>{e.title}</Text>
               <Muted>{[e.subject_name, e.duration_minutes ? `${e.duration_minutes} min` : null].filter(Boolean).join(" · ") || " "}</Muted>
               <Pill text={s.text} color={s.color} />
+              {s.text === "Open" ? <Button title="Start" onPress={() => router.push({ pathname: "/exam/[id]", params: { id: e.id } })} /> : null}
             </Card>
           );
         })}
-        <Card><Muted>Taking exams in the app is coming in the next update. For now, sit your exams in the web portal.</Muted></Card>
       </ScrollView>
     </SafeAreaView>
   );

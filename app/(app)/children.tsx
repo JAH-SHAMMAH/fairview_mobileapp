@@ -1,10 +1,12 @@
 import { RefreshControl, ScrollView, StyleSheet, Text, View } from "react-native";
+import { useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRole } from "../../src/lib/role";
-import { Avatar, Card, Empty, ErrorBox, H1, Loading, Muted, Pill } from "../../src/components/ui";
+import { Avatar, Button, Card, Empty, ErrorBox, H1, Loading, Muted, Pill } from "../../src/components/ui";
 import { colors } from "../../src/lib/theme";
 
 export default function Children() {
+  const router = useRouter();
   const { ctx, isLoading, isError, refetch } = useRole();
   if (isLoading) return <Loading />;
   if (isError || !ctx) return <ErrorBox text="Couldn't load your children." onRetry={refetch} />;
@@ -30,6 +32,10 @@ export default function Children() {
                 <View style={st.stat}><Text style={[st.num, { color: ac }]}>{att == null ? "–" : `${Math.round(att)}%`}</Text><Muted>Attendance</Muted></View>
                 <View style={st.stat}><Text style={st.num}>{c.stats.latest_grade_letter ?? "–"}</Text><Muted>Latest grade</Muted></View>
                 <View style={st.stat}><Text style={st.num}>{c.stats.pending_assignments}</Text><Muted>Assignments</Muted></View>
+              </View>
+              <View style={{ flexDirection: "row", gap: 10 }}>
+                <View style={{ flex: 1 }}><Button title="Report card" onPress={() => router.push({ pathname: "/report/[id]", params: { id: c.id } })} /></View>
+                <View style={{ flex: 1 }}><Button title="Attendance" color={colors.brandSoft} onPress={() => router.push({ pathname: "/attendance/[id]", params: { id: c.id } })} /></View>
               </View>
             </Card>
           );

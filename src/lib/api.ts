@@ -93,6 +93,8 @@ export interface ParentChild {
 export interface Slot { id: string; subject_name: string | null; start_time: string; end_time: string; room: string | null; day_of_week: number }
 export interface MyContexts {
   roles: string[]; available_roles: Role[]; default_role: Role;
+  as_admin: { is_admin: true } | null;
+  as_teacher: { classes: { id: string; name: string }[]; today_slots: Slot[]; stats: { classes_count: number; subjects_count: number; today_lessons: number; pending_grades: number } } | null;
   as_parent: { children: ParentChild[] } | null;
   as_student: {
     student: { id: string; first_name: string; last_name: string; photo_url: string | null };
@@ -101,3 +103,5 @@ export interface MyContexts {
     stats: { attendance_pct: number | null; attendance_days: number; pending_assignments: number };
   } | null;
 }
+
+export const isSuperUser = (me: Me | null) => !!me && (me.primary_role === "super_user" || me.permissions?.includes("*"));

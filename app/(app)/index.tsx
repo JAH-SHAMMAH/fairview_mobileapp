@@ -2,7 +2,9 @@ import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "../../src/lib/auth";
+import { api, isSuperUser } from "../../src/lib/api";
 import { useRole } from "../../src/lib/role";
 import { Avatar, Card, ErrorBox, Loading, Muted } from "../../src/components/ui";
 import { colors } from "../../src/lib/theme";
@@ -22,6 +24,11 @@ export default function Home() {
   const { me } = useAuth();
   const { ctx, role, setRole, isLoading, isError, refetch } = useRole();
   const router = useRouter();
+  const staffAdmin = role === "admin";
+  const overview = useQuery<{ students: { total: number; male: number; female: number }; classes: number; teachers: number; attendance_today: number }>({
+    queryKey: ["overview"], enabled: staffAdmin, retry: false,
+    queryFn: () => api.get("/dashboard/overview").then((r) => r.data),
+  });
   if (isLoading) return <Loading />;
   if (isError || !ctx) return <ErrorBox text="Couldn't load your dashboard." onRetry={refetch} />;
 
@@ -97,11 +104,43 @@ export default function Home() {
           </>
         )}
 
-        {role !== "parent" && role !== "student" && (
-          <Card style={{ gap: 6 }}>
-            <Text style={st.cn}>The {role} screens are coming next</Text>
-            <Muted>This first version covers parents and students. Please use the web portal for now.</Muted>
-          </Card>
+        {role === "admin" && (
+          <>
+            {isSuperUser(me) && <Card style={{ backgroundColor: "#EDE9FE", borderColor: "#C4B5FD" }}><Text style={{ fontWeight: "900", color: "#5B21B6" }}>Super User</Text><Muted>You have full access. Use the web portal for settings, users and backups.</Muted></Card>}
+            {overview.isLoading ? <Loading /> : overview.data ? (
+              <>
+                <View style={st.grid}>
+                  <Card style={st.stat}><Text style={st.big}>{overview.data.students.total}</Text><Muted>Students</Muted></Card>
+                  <Card style={st.stat}><Text style={st.big}>{overview.data.teachers}</Text><Muted>Teachers</Muted></Card>
+                </View>
+                <View style={st.grid}>
+                  <Card style={st.stat}><Text style={st.big}>{overview.data.classes}</Text><Muted>Classes</Muted></Card>
+                  <Card style={st.stat}><Text style={st.big}>{overview.data.attendance_today}</Text><Muted>Marked today</Muted></Card>
+                </View>
+              </>
+            ) : <Card><Muted>The school overview isn't available for your account.</Muted></Card>}
+            <View style={st.grid}>
+              <Tile icon="checkbox" label="Mark attendance" color={colors.green} onPress={() => router.push("/mark")} />
+              <Tile icon="newspaper" label="News feed" color={colors.indigo} onPress={() => router.push("/feed")} />
+            </View>
+          </>
+        )}
+
+        {role === "teacher" && ctx.as_teacher && (
+          <>
+            <View style={st.grid}>
+              <Card style={st.stat}><Text style={st.big}>{ctx.as_teacher.stats.classes_count}</Text><Muted>Classes</Muted></Card>
+              <Card style={st.stat}><Text style={st.big}>{ctx.as_teacher.stats.today_lessons}</Text><Muted>Lessons today</Muted></Card>
+            </View>
+            <View style={st.grid}>
+              <Tile icon="checkbox" label="Mark attendance" color={colors.green} onPress={() => router.push("/mark")} />
+              <Tile icon="newspaper" label="News feed" color={colors.indigo} onPress={() => router.push("/feed")} />
+            </View>
+            <Text style={st.sec}>Today’s lessons</Text>
+            {ctx.as_teacher.today_slots.length === 0 ? <Card><Muted>No lessons scheduled today.</Muted></Card> : ctx.as_teacher.today_slots.map((s) => (
+              <Card key={s.id}><Text style={st.cn}>{s.subject_name || "Lesson"}</Text><Muted>{s.start_time.slice(0, 5)} – {s.end_time.slice(0, 5)}{s.room ? ` · ${s.room}` : ""}</Muted></Card>
+            ))}
+          </>
         )}
       </ScrollView>
     </SafeAreaView>
