@@ -26,6 +26,11 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      # Never publish or build a version that fails its own checks.
+      - name: Typecheck
+        run: npm run typecheck
+      - name: Tests
+        run: npm test
       - name: Link or create the Expo project
         run: npx eas-cli@latest init --non-interactive --force
       - name: Publish update (Expo Go)

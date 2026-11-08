@@ -6,13 +6,15 @@ React Native (Expo + TypeScript) companion to the ExtraCare / Fairview School we
 
 | Role | Screens |
 |------|---------|
-| Parent | Dashboard, My children, report card (term/report pickers), attendance history, pay fees (Paystack/Flutterwave/Remita) |
+| Parent | Dashboard, My children, report card (term/report pickers), attendance history, pay fees (Paystack/Flutterwave/Remita; card payments return straight to the app), Refresh payments, payment history with dates and references |
 | Student | Dashboard (today's lessons), exam room (timer, auto-submit, MCQ / true-false / written), exam list, JAMB/WAEC/NECO + school practice with answer review, progress |
 | Teacher | Dashboard (classes, today's lessons), mark attendance, enter report scores, CBT results (release to students, mark written answers) |
 | Admin / Super User | School overview, mark attendance, School directory (students, teachers, classes; audit log for Super User), news feed (Super User can delete any post) |
 | Everyone | News feed, notices, account / sign out |
 
-Not yet in the app: file-upload exam answers, push notifications, user management and backups. Use the web portal for those. Nothing here has been tested on a device yet.
+Not yet in the app: file-upload exam answers, push notifications, user management and backups. Use the web portal for those.
+
+Tested against a real backend in phone-sized, touch-enabled browsers (iPhone SE 375pt, Galaxy S8 360pt, Pixel 5) for all four roles. Not yet tried on a physical device.
 
 ## Run it on your phone (Expo Go)
 
@@ -40,7 +42,13 @@ src/components/ shared UI
 
 ## Checks
 
-`npm run typecheck`
+```
+npm run typecheck   # TypeScript
+npx expo lint       # ESLint (eslint-config-expo)
+npm test            # Jest (jest-expo + React Native Testing Library), tests in __tests__/
+```
+
+Tests live in `__tests__/`, never under `app/` (every file there becomes a screen).
 
 ## Build for Android and iOS (EAS)
 
