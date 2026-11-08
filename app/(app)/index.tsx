@@ -44,7 +44,7 @@ export default function Home() {
             <Muted>{greet()}</Muted>
             <Text style={st.name}>{first || "Welcome"} 👋</Text>
           </View>
-          <Avatar name={me?.full_name || "?"} />
+          <Avatar name={me?.full_name || "?"} uri={me?.avatar_url} />
         </View>
 
         {ctx.available_roles.length > 1 && (
@@ -77,6 +77,14 @@ export default function Home() {
               <Tile icon="people" label="All children" color={colors.brandSoft} onPress={() => router.push("/children")} />
               <Tile icon="card" label="Pay fees" color={colors.amber} onPress={() => router.push("/fees")} />
             </View>
+            <View style={st.grid}>
+              <Tile icon="happy" label="Daily reports" color={colors.green} onPress={() => router.push("/daily")} />
+              <Tile icon="chatbubbles" label="Messages" color={colors.indigo} onPress={() => router.push("/messages")} />
+            </View>
+            <View style={st.grid}>
+              <Tile icon="calendar" label="Timetable" color={colors.violet} onPress={() => router.push("/timetable")} />
+              <View style={{ flex: 1 }} />
+            </View>
           </>
         )}
 
@@ -94,6 +102,10 @@ export default function Home() {
               <Tile icon="document-text" label="Exam portal" color={colors.indigo} onPress={() => router.push("/exams")} />
               <Tile icon="trending-up" label="My progress" color={colors.violet} onPress={() => router.push("/progress")} />
             </View>
+            <View style={st.grid}>
+              <Tile icon="calendar" label="Timetable" color={colors.brandSoft} onPress={() => router.push("/timetable")} />
+              <View style={{ flex: 1 }} />
+            </View>
             <Text style={st.sec}>Today’s lessons</Text>
             {stu.today_slots.length === 0 ? <Card><Muted>No lessons scheduled today.</Muted></Card> : stu.today_slots.map((s) => (
               <Card key={s.id} style={st.row}>
@@ -108,7 +120,7 @@ export default function Home() {
 
         {role === "admin" && (
           <>
-            {isSuperUser(me) && <Card style={{ backgroundColor: "#EDE9FE", borderColor: "#C4B5FD" }}><Text style={{ fontWeight: "900", color: "#5B21B6" }}>Super User</Text><Muted>You have full access. Use the web portal for settings, users and backups.</Muted></Card>}
+            {isSuperUser(me) && <Card style={{ backgroundColor: "#EDE9FE", borderColor: "#C4B5FD" }}><Text style={{ fontWeight: "900", color: "#5B21B6" }}>Super User</Text><Muted>You have full access. Manage users and download backups from Account; school settings stay in the web portal.</Muted></Card>}
             {overview.isLoading ? <Loading /> : overview.data ? (
               <>
                 <View style={st.grid}>
@@ -124,6 +136,10 @@ export default function Home() {
             <View style={st.grid}>
               <Tile icon="checkbox" label="Mark attendance" color={colors.green} onPress={() => router.push("/mark")} />
               <Tile icon="newspaper" label="News feed" color={colors.indigo} onPress={() => router.push("/feed")} />
+            </View>
+            <View style={st.grid}>
+              <Tile icon="chatbubbles" label="Messages" color={colors.brandSoft} onPress={() => router.push("/messages")} />
+              <Tile icon="airplane" label="Leave" color={colors.violet} onPress={() => router.push("/leave")} />
             </View>
           </>
         )}
@@ -141,6 +157,14 @@ export default function Home() {
             <View style={st.grid}>
               <Tile icon="create" label="Enter scores" color={colors.violet} onPress={() => router.push("/entry")} />
               <Tile icon="podium" label="CBT results" color={colors.amber} onPress={() => router.push("/cbt")} />
+            </View>
+            <View style={st.grid}>
+              <Tile icon="happy" label="Daily reports" color={colors.green} onPress={() => router.push("/daily")} />
+              <Tile icon="chatbubbles" label="Messages" color={colors.brandSoft} onPress={() => router.push("/messages")} />
+            </View>
+            <View style={st.grid}>
+              <Tile icon="calendar" label="Timetable" color={colors.violet} onPress={() => router.push("/timetable")} />
+              <Tile icon="airplane" label="Leave" color={colors.indigo} onPress={() => router.push("/leave")} />
             </View>
             <Text style={st.sec}>Today’s lessons</Text>
             {ctx.as_teacher.today_slots.length === 0 ? <Card><Muted>No lessons scheduled today.</Muted></Card> : ctx.as_teacher.today_slots.map((s) => (

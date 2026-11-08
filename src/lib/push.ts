@@ -102,6 +102,9 @@ export function routeForAlert(data: unknown): string {
   const d = (data ?? {}) as { url?: string; kind?: string };
   const url = String(d.url || "");
   const kind = String(d.kind || "");
+  if (kind === "daily_report" || url.includes("daily-report")) return "/daily";
+  if (kind === "message" || url.includes("communication-book")) return "/messages";
+  if (kind === "leave" || url.includes("/leave")) return "/leave";
   if (kind === "attendance" || url.includes("attendance")) return "/children";
   if (kind === "report" || url.includes("report") || url.includes("result")) return "/progress";
   if (url.includes("fee") || url.includes("payment")) return "/fees";

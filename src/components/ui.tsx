@@ -1,6 +1,7 @@
-import React from "react";
-import { ActivityIndicator, Pressable, StyleProp, StyleSheet, Text, View, ViewStyle } from "react-native";
+import React, { useState } from "react";
+import { ActivityIndicator, Image, Pressable, StyleProp, StyleSheet, Text, View, ViewStyle } from "react-native";
 import { colors } from "../lib/theme";
+import { API_URL } from "../lib/api";
 
 export function Card({ children, style }: { children: React.ReactNode; style?: StyleProp<ViewStyle> }) {
   return <View style={[s.card, style]}>{children}</View>;
@@ -34,8 +35,11 @@ export function ErrorBox({ text, onRetry }: { text: string; onRetry?: () => void
 export function Pill({ text, color }: { text: string; color: string }) {
   return <View style={[s.pill, { backgroundColor: color + "22" }]}><Text style={{ color, fontWeight: "800", fontSize: 12 }}>{text}</Text></View>;
 }
-export function Avatar({ name, size = 52 }: { name: string; size?: number }) {
+export function Avatar({ name, size = 52, uri }: { name: string; size?: number; uri?: string | null }) {
+  const [broken, setBroken] = useState(false);
   const ini = name.split(" ").filter(Boolean).slice(0, 2).map((w) => w[0]?.toUpperCase()).join("");
+  const src = uri && !broken ? (/^https?:\/\//.test(uri) ? uri : `${API_URL}${uri.startsWith("/") ? "" : "/"}${uri}`) : null;
+  if (src) return <Image accessibilityLabel={`${name}'s photo`} source={{ uri: src }} onError={() => setBroken(true)} style={{ width: size, height: size, borderRadius: size / 2, backgroundColor: colors.border }} />;
   return <View style={{ width: size, height: size, borderRadius: size / 2, backgroundColor: colors.brand, alignItems: "center", justifyContent: "center" }}><Text style={{ color: "#fff", fontWeight: "900", fontSize: size / 2.6 }}>{ini}</Text></View>;
 }
 export const s = StyleSheet.create({

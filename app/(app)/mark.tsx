@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { Alert, Pressable, RefreshControl, ScrollView, Text, View } from "react-native";
+import { Pressable, RefreshControl, ScrollView, Text, View } from "react-native";
+import { notify } from "../../src/lib/confirm";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { api, errorText } from "../../src/lib/api";
@@ -35,8 +36,8 @@ export default function MarkAttendance() {
 
   const save = useMutation({
     mutationFn: () => api.post("/school/attendance", Object.entries(marks).map(([student_id, status]) => ({ student_id, class_id: classId, status })), { params: { attendance_date: date } }).then((r) => r.data),
-    onSuccess: (r) => { Alert.alert("Saved", `${r.marked} pupils marked for today.`); saved.refetch(); },
-    onError: (e) => Alert.alert("Couldn't save", errorText(e)),
+    onSuccess: (r) => { notify("Saved", `${r.marked} pupils marked for today.`); saved.refetch(); },
+    onError: (e) => notify("Couldn't save", errorText(e)),
   });
 
   const all = (st: Status) => setMarks((m) => Object.fromEntries(Object.keys(m).map((k) => [k, st])));

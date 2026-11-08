@@ -60,6 +60,11 @@ function TabsByRole() {
       <Tabs.Screen name="users/[id]" options={SCREEN_ONLY} />
       <Tabs.Screen name="users/new" options={SCREEN_ONLY} />
       <Tabs.Screen name="backup" options={SCREEN_ONLY} />
+      <Tabs.Screen name="timetable" options={SCREEN_ONLY} />
+      <Tabs.Screen name="daily" options={SCREEN_ONLY} />
+      <Tabs.Screen name="messages" options={SCREEN_ONLY} />
+      <Tabs.Screen name="leave" options={SCREEN_ONLY} />
+      <Tabs.Screen name="profile" options={SCREEN_ONLY} />
       <Tabs.Screen name="account" options={{ title: "Account", tabBarIcon: icon("person-circle", "person-circle-outline") }} />
     </Tabs>
   );

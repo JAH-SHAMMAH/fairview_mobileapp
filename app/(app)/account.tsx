@@ -37,6 +37,7 @@ export default function Account() {
   const [push, setPush] = useState<PushStatus | null>(getPushStatus());
   const [pushBusy, setPushBusy] = useState(false);
   const unsupported = pushUnsupportedReason();
+  const isStaff = !!me && !["parent", "student"].includes(me.primary_role);
 
   useEffect(() => {
     let live = true;
@@ -60,14 +61,16 @@ export default function Account() {
       <ScrollView contentContainerStyle={{ padding: 18, gap: 14, paddingBottom: 40 }}>
         <H1>Account</H1>
         <Card style={{ alignItems: "center", gap: 8 }}>
-          <Avatar name={me?.full_name || "?"} size={76} />
+          <Avatar name={me?.full_name || "?"} uri={me?.avatar_url} size={76} />
           <Text style={{ fontSize: 20, fontWeight: "900", color: colors.text, textAlign: "center" }}>{me?.full_name}</Text>
           <Muted>{me?.email}</Muted>
           <Muted>{me?.org?.name ?? "Fairview School"}</Muted>
         </Card>
 
         <View style={{ gap: 10 }}>
+          <Row title="My details" sub="Name, phone number and photo" onPress={() => router.push("/profile")} />
           <Row title="Change password" onPress={() => router.push("/change-password")} />
+          {isStaff ? <Row title="Leave" sub="Apply for leave and see your days left" onPress={() => router.push("/leave")} /> : null}
           {canManageUsers(me) ? <Row title="Manage users" sub="Add staff and parents, change roles, reset passwords" onPress={() => router.push("/users")} /> : null}
           {canBackup(me) ? <Row title="Backup" sub="Download a copy of all the school's records" onPress={() => router.push("/backup")} /> : null}
         </View>

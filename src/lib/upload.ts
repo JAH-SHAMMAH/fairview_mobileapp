@@ -36,31 +36,45 @@ export function checkAnswerFile(f: PickedFile): string | null {
   return null;
 }
 
-async function send(f: PickedFile, token: string | null) {
+async function send(path: string, f: PickedFile, token: string | null) {
   const form = new FormData();
   if (Platform.OS === "web" && f.file) form.append("file", f.file, f.name);
   // React Native's FormData takes {uri, name, type} for a file on disk
   else form.append("file", { uri: f.uri, name: f.name, type: guessType(f) } as any);
-  return fetch(`${API_URL}/api/v1/upload/exam-answer`, {
+  return fetch(`${API_URL}/api/v1${path}`, {
     method: "POST",
     headers: token ? { Authorization: `Bearer ${token}`, Accept: "application/json" } : { Accept: "application/json" },
     body: form,
   });
 }
 
-export async function uploadExamAnswer(f: PickedFile): Promise<{ url: string; filename: string }> {
-  const bad = checkAnswerFile(f);
-  if (bad) throw new Error(bad);
-  let r = await send(f, (await tokens.get()).access);
+/** POST one file as multipart "file"; retries once after a session refresh. */
+export async function uploadFile<T = { url: string }>(path: string, f: PickedFile): Promise<T> {
+  let r = await send(path, f, (await tokens.get()).access);
   if (r.status === 401) {
     // let the api client refresh the session, then try once more
     try { await api.get("/auth/me"); } catch {}
-    r = await send(f, (await tokens.get()).access);
+    r = await send(path, f, (await tokens.get()).access);
   }
   const body = await r.json().catch(() => ({}));
   if (!r.ok) {
     const d = (body as any)?.detail;
     throw new Error(typeof d === "string" ? d : "The file didn't upload. Check your connection and try again.");
   }
-  return body as { url: string; filename: string };
+  return body as T;
+}
+
+export async function uploadExamAnswer(f: PickedFile): Promise<{ url: string; filename: string }> {
+  const bad = checkAnswerFile(f);
+  if (bad) throw new Error(bad);
+  return uploadFile("/upload/exam-answer", f);
+}
+
+const PHOTO_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
+/** Your own profile photo (POST /upload/avatar saves it on your account). */
+export async function uploadAvatar(f: PickedFile): Promise<{ url: string }> {
+  const type = guessType(f);
+  if (!PHOTO_TYPES.includes(type)) throw new Error("Use a JPG or PNG photo.");
+  if (f.size && f.size > 5 * 1024 * 1024) throw new Error("That photo is bigger than 5 MB. Choose a smaller one.");
+  return uploadFile("/upload/avatar", f);
 }

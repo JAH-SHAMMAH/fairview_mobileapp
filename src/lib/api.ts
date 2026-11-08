@@ -100,17 +100,22 @@ export interface ParentChild {
   id: string; student_id: string; first_name: string; last_name: string;
   photo_url: string | null; class_id: string | null; class_name: string | null;
   relationship: string; is_primary: boolean;
+  timetable?: Slot[];
   stats: { attendance_pct: number | null; pending_assignments: number; latest_grade_letter: string | null; latest_grade_score: number | null };
 }
-export interface Slot { id: string; subject_name: string | null; start_time: string; end_time: string; room: string | null; day_of_week: number }
+export interface Slot {
+  id: string; subject_name: string | null; start_time: string; end_time: string; room: string | null; day_of_week: number;
+  class_id?: string | null; teacher_id?: string | null;
+}
 export interface MyContexts {
   roles: string[]; available_roles: Role[]; default_role: Role;
   as_admin: { is_admin: true } | null;
-  as_teacher: { classes: { id: string; name: string }[]; today_slots: Slot[]; stats: { classes_count: number; subjects_count: number; today_lessons: number; pending_grades: number } } | null;
+  as_teacher: { classes: { id: string; name: string }[]; timetable?: Slot[]; today_slots: Slot[]; stats: { classes_count: number; subjects_count: number; today_lessons: number; pending_grades: number } } | null;
   as_parent: { children: ParentChild[] } | null;
   as_student: {
     student: { id: string; first_name: string; last_name: string; photo_url: string | null };
-    class: { name: string } | null;
+    class: { id?: string; name: string } | null;
+    timetable?: Slot[];
     today_slots: Slot[];
     stats: { attendance_pct: number | null; attendance_days: number; pending_assignments: number };
   } | null;
