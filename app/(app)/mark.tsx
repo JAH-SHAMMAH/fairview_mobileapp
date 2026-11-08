@@ -4,7 +4,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { api, errorText } from "../../src/lib/api";
 import { Avatar, Button, Card, Empty, ErrorBox, H1, Loading, Muted } from "../../src/components/ui";
-import { colors } from "../../src/lib/theme";
+import { colors, fmtDate } from "../../src/lib/theme";
 
 type Status = "present" | "absent" | "late" | "excused";
 const ORDER: Status[] = ["present", "absent", "late", "excused"];
@@ -50,7 +50,7 @@ export default function MarkAttendance() {
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.bg }} edges={["top"]}>
       <ScrollView contentContainerStyle={{ padding: 18, gap: 12, paddingBottom: 40 }} refreshControl={<RefreshControl refreshing={false} onRefresh={() => { roster.refetch(); saved.refetch(); }} />}>
         <H1>Mark attendance</H1>
-        <Muted>{new Date().toDateString()} · tap a pupil to change their status</Muted>
+        <Muted>{fmtDate(new Date(), { weekday: true })} · tap a pupil to change their status</Muted>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8 }}>
           {(classes.data?.items ?? []).map((c) => (
             <Text key={c.id} onPress={() => setClassId(c.id)} style={{ paddingHorizontal: 14, paddingVertical: 8, borderRadius: 20, overflow: "hidden", fontWeight: "800", borderWidth: 1, borderColor: classId === c.id ? colors.brand : colors.border, backgroundColor: classId === c.id ? colors.brand : "#fff", color: classId === c.id ? "#fff" : colors.text }}>{c.name}</Text>

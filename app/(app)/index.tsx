@@ -6,8 +6,8 @@ import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "../../src/lib/auth";
 import { api, isSuperUser } from "../../src/lib/api";
 import { useRole } from "../../src/lib/role";
-import { Avatar, Card, ErrorBox, Loading, Muted } from "../../src/components/ui";
-import { colors } from "../../src/lib/theme";
+import { Avatar, Card, ErrorBox, Loading, Muted, StatLabel } from "../../src/components/ui";
+import { colors, firstName } from "../../src/lib/theme";
 
 const greet = () => { const h = new Date().getHours(); return h < 12 ? "Good morning" : h < 17 ? "Good afternoon" : "Good evening"; };
 
@@ -32,7 +32,7 @@ export default function Home() {
   if (isLoading) return <Loading />;
   if (isError || !ctx) return <ErrorBox text="Couldn't load your dashboard." onRetry={refetch} />;
 
-  const first = (me?.full_name || "").split(" ")[0];
+  const first = firstName(me?.full_name);
   const kids = ctx.as_parent?.children ?? [];
   const stu = ctx.as_student;
 
@@ -65,10 +65,12 @@ export default function Home() {
                   <Text style={st.cn}>{c.first_name} {c.last_name}</Text>
                   <Muted>{c.class_name || "No class yet"}</Muted>
                 </View>
-                <View style={{ alignItems: "flex-end" }}>
-                  <Text style={[st.big, { color: c.stats.attendance_pct == null ? colors.muted : c.stats.attendance_pct >= 90 ? colors.green : c.stats.attendance_pct >= 75 ? colors.amber : colors.red }]}>{c.stats.attendance_pct == null ? "–" : `${Math.round(c.stats.attendance_pct)}%`}</Text>
-                  <Muted>attendance</Muted>
-                </View>
+                {c.stats.attendance_pct != null && (
+                  <View style={{ alignItems: "flex-end" }}>
+                    <Text style={[st.big, { color: c.stats.attendance_pct >= 90 ? colors.green : c.stats.attendance_pct >= 75 ? colors.amber : colors.red }]}>{`${Math.round(c.stats.attendance_pct)}%`}</Text>
+                    <StatLabel>attendance</StatLabel>
+                  </View>
+                )}
               </Card>
             ))}
             <View style={st.grid}>
@@ -85,8 +87,8 @@ export default function Home() {
               <Text style={{ color: "#fff", fontSize: 22, fontWeight: "900" }}>{stu.student.first_name} {stu.student.last_name}</Text>
             </Card>
             <View style={st.grid}>
-              <Card style={st.stat}><Text style={st.big}>{stu.stats.attendance_pct == null ? "–" : `${Math.round(stu.stats.attendance_pct)}%`}</Text><Muted>Attendance</Muted></Card>
-              <Card style={st.stat}><Text style={st.big}>{stu.stats.pending_assignments}</Text><Muted>Assignments due</Muted></Card>
+              <Card style={st.stat}><Text style={st.big}>{stu.stats.attendance_pct == null ? "–" : `${Math.round(stu.stats.attendance_pct)}%`}</Text><StatLabel>Attendance</StatLabel></Card>
+              <Card style={st.stat}><Text style={st.big}>{stu.stats.pending_assignments}</Text><StatLabel>Assignments due</StatLabel></Card>
             </View>
             <View style={st.grid}>
               <Tile icon="document-text" label="Exam portal" color={colors.indigo} onPress={() => router.push("/exams")} />
@@ -110,15 +112,15 @@ export default function Home() {
             {overview.isLoading ? <Loading /> : overview.data ? (
               <>
                 <View style={st.grid}>
-                  <Card style={st.stat}><Text style={st.big}>{overview.data.students.total}</Text><Muted>Students</Muted></Card>
-                  <Card style={st.stat}><Text style={st.big}>{overview.data.teachers}</Text><Muted>Teachers</Muted></Card>
+                  <Card style={st.stat}><Text style={st.big}>{overview.data.students.total}</Text><StatLabel>Students</StatLabel></Card>
+                  <Card style={st.stat}><Text style={st.big}>{overview.data.teachers}</Text><StatLabel>Teachers</StatLabel></Card>
                 </View>
                 <View style={st.grid}>
-                  <Card style={st.stat}><Text style={st.big}>{overview.data.classes}</Text><Muted>Classes</Muted></Card>
-                  <Card style={st.stat}><Text style={st.big}>{overview.data.attendance_today}</Text><Muted>Marked today</Muted></Card>
+                  <Card style={st.stat}><Text style={st.big}>{overview.data.classes}</Text><StatLabel>{overview.data.classes === 1 ? "Class" : "Classes"}</StatLabel></Card>
+                  <Card style={st.stat}><Text style={st.big}>{overview.data.attendance_today}</Text><StatLabel>Marked today</StatLabel></Card>
                 </View>
               </>
-            ) : <Card><Muted>The school overview isn't available for your account.</Muted></Card>}
+            ) : <Card><Muted>The school overview isn’t available for your account.</Muted></Card>}
             <View style={st.grid}>
               <Tile icon="checkbox" label="Mark attendance" color={colors.green} onPress={() => router.push("/mark")} />
               <Tile icon="newspaper" label="News feed" color={colors.indigo} onPress={() => router.push("/feed")} />
@@ -129,8 +131,8 @@ export default function Home() {
         {role === "teacher" && ctx.as_teacher && (
           <>
             <View style={st.grid}>
-              <Card style={st.stat}><Text style={st.big}>{ctx.as_teacher.stats.classes_count}</Text><Muted>Classes</Muted></Card>
-              <Card style={st.stat}><Text style={st.big}>{ctx.as_teacher.stats.today_lessons}</Text><Muted>Lessons today</Muted></Card>
+              <Card style={st.stat}><Text style={st.big}>{ctx.as_teacher.stats.classes_count}</Text><StatLabel>{ctx.as_teacher.stats.classes_count === 1 ? "Class" : "Classes"}</StatLabel></Card>
+              <Card style={st.stat}><Text style={st.big}>{ctx.as_teacher.stats.today_lessons}</Text><StatLabel>{ctx.as_teacher.stats.today_lessons === 1 ? "Lesson today" : "Lessons today"}</StatLabel></Card>
             </View>
             <View style={st.grid}>
               <Tile icon="checkbox" label="Mark attendance" color={colors.green} onPress={() => router.push("/mark")} />

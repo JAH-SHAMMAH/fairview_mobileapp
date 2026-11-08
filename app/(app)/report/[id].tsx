@@ -4,8 +4,8 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "../../../src/lib/api";
-import { Button, Card, ErrorBox, H1, Loading, Muted, Pill } from "../../../src/components/ui";
-import { colors } from "../../../src/lib/theme";
+import { Button, Card, ErrorBox, H1, Loading, Muted, Pill, StatLabel } from "../../../src/components/ui";
+import { colors, fmtDate } from "../../../src/lib/theme";
 
 interface Named { id: string; name: string; alias?: string; is_active?: boolean; is_current?: boolean }
 interface Card_ {
@@ -65,7 +65,7 @@ export default function ReportCardScreen() {
         {!ready || card.isLoading ? <Loading /> : card.isError ? (
           <ErrorBox text={typeof detail === "string" ? detail : "This report card isn't available yet. It appears once the school publishes it."} onRetry={() => card.refetch()} />
         ) : !c || c.not_configured ? (
-          <Card><Muted>This report isn't set up yet for the chosen term.</Muted></Card>
+          <Card><Muted>This report isn’t set up yet for the chosen term.</Muted></Card>
         ) : (
           <>
             <Card style={{ backgroundColor: colors.brand, gap: 4 }}>
@@ -74,9 +74,9 @@ export default function ReportCardScreen() {
               <Text style={{ color: "#CFE6DA" }}>{c.class_name}{c.class_teacher_name ? ` · ${c.class_teacher_name}` : ""}</Text>
             </Card>
             <View style={{ flexDirection: "row", gap: 10 }}>
-              <Card style={{ flex: 1 }}><Text style={{ fontSize: 22, fontWeight: "900", color: colors.text }}>{num(c.average)}%</Text><Muted>Average</Muted></Card>
-              <Card style={{ flex: 1 }}><Text style={{ fontSize: 22, fontWeight: "900", color: colors.text }}>{c.grade || "–"}</Text><Muted>Grade</Muted></Card>
-              <Card style={{ flex: 1 }}><Text style={{ fontSize: 22, fontWeight: "900", color: colors.text }}>{c.position ? ord(c.position) : "–"}</Text><Muted>of {c.class_size || "–"}</Muted></Card>
+              <Card style={{ flex: 1, padding: 12 }}><Text style={{ fontSize: 22, fontWeight: "900", color: colors.text }}>{num(c.average)}%</Text><StatLabel>Average</StatLabel></Card>
+              <Card style={{ flex: 1, padding: 12 }}><Text style={{ fontSize: 22, fontWeight: "900", color: colors.text }}>{c.grade || "–"}</Text><StatLabel>Grade</StatLabel></Card>
+              <Card style={{ flex: 1, padding: 12 }}><Text style={{ fontSize: 22, fontWeight: "900", color: colors.text }}>{c.position ? ord(c.position) : "–"}</Text><StatLabel>of {c.class_size || "–"}</StatLabel></Card>
             </View>
             {c.subjects.map((s) => (
               <Card key={s.subject_id} style={{ gap: 8 }}>
@@ -96,7 +96,7 @@ export default function ReportCardScreen() {
               </Card>
             ))}
             {c.attendance_total != null && <Card><Muted>Attendance: present {c.attendance_present ?? 0} of {c.attendance_total} days</Muted></Card>}
-            {c.next_term_begins ? <Card><Muted>Next term begins {new Date(c.next_term_begins).toLocaleDateString()}</Muted></Card> : null}
+            {c.next_term_begins ? <Card><Muted>Next term begins {fmtDate(c.next_term_begins)}</Muted></Card> : null}
           </>
         )}
       </ScrollView>

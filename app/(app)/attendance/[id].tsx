@@ -4,7 +4,7 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "../../../src/lib/api";
 import { Button, Card, Empty, ErrorBox, H1, Loading, Muted, Pill } from "../../../src/components/ui";
-import { colors } from "../../../src/lib/theme";
+import { colors, fmtDate } from "../../../src/lib/theme";
 
 interface Hist { records: { id: string; date: string; status: string; notes?: string | null }[]; summary: { present: number; absent: number; late: number; excused: number; total: number; attendance_rate: number } }
 const tone: Record<string, string> = { present: colors.green, absent: colors.red, late: colors.amber, excused: colors.indigo };
@@ -25,7 +25,7 @@ export default function AttendanceHistory() {
         {records.length === 0 ? <Empty title="No records yet" /> : records.map((r) => (
           <Card key={r.id} style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", paddingVertical: 12 }}>
             <View style={{ flex: 1 }}>
-              <Text style={{ fontWeight: "800", color: colors.text }}>{new Date(r.date).toLocaleDateString(undefined, { weekday: "short", day: "numeric", month: "short", year: "numeric" })}</Text>
+              <Text style={{ fontWeight: "800", color: colors.text }}>{fmtDate(r.date, { weekday: true })}</Text>
               {r.notes ? <Muted>{r.notes}</Muted> : null}
             </View>
             <Pill text={r.status[0].toUpperCase() + r.status.slice(1)} color={tone[r.status] ?? colors.muted} />

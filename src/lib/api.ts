@@ -1,5 +1,17 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from "axios";
+import { Platform } from "react-native";
 import * as SecureStore from "expo-secure-store";
+
+// On phones tokens live in the device keychain. expo-secure-store has no web
+// implementation (it throws), so `npm run web` crashed before the login screen.
+// The browser build keeps them in sessionStorage instead: gone when the tab closes.
+const store = Platform.OS === "web"
+  ? {
+      getItemAsync: async (k: string) => { try { return globalThis.sessionStorage?.getItem(k) ?? null; } catch { return null; } },
+      setItemAsync: async (k: string, v: string) => { try { globalThis.sessionStorage?.setItem(k, v); } catch {} },
+      deleteItemAsync: async (k: string) => { try { globalThis.sessionStorage?.removeItem(k); } catch {} },
+    }
+  : SecureStore;
 
 // Public base URL only. Tokens live in the device keychain, never in code.
 export const API_URL = (process.env.EXPO_PUBLIC_API_URL || "https://fairview-portal.onrender.com").replace(/\/$/, "");
@@ -9,15 +21,15 @@ const REFRESH = "fv_refresh";
 
 export const tokens = {
   async get() {
-    return { access: await SecureStore.getItemAsync(ACCESS), refresh: await SecureStore.getItemAsync(REFRESH) };
+    return { access: await store.getItemAsync(ACCESS), refresh: await store.getItemAsync(REFRESH) };
   },
   async set(access: string, refresh: string) {
-    await SecureStore.setItemAsync(ACCESS, access);
-    await SecureStore.setItemAsync(REFRESH, refresh);
+    await store.setItemAsync(ACCESS, access);
+    await store.setItemAsync(REFRESH, refresh);
   },
   async clear() {
-    await SecureStore.deleteItemAsync(ACCESS);
-    await SecureStore.deleteItemAsync(REFRESH);
+    await store.deleteItemAsync(ACCESS);
+    await store.deleteItemAsync(REFRESH);
   },
 };
 

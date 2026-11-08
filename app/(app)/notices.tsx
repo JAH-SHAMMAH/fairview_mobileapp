@@ -1,9 +1,9 @@
-import { RefreshControl, ScrollView, Text, View } from "react-native";
+import { RefreshControl, ScrollView, Text } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "../../src/lib/api";
 import { Button, Card, Empty, ErrorBox, H1, Loading, Muted } from "../../src/components/ui";
-import { colors } from "../../src/lib/theme";
+import { colors, fmtDate } from "../../src/lib/theme";
 
 interface N { id: string; title: string; message?: string | null; read: boolean; created_at: string }
 
@@ -24,7 +24,7 @@ export default function Notices() {
           <Card key={n.id} style={{ gap: 4, borderLeftWidth: 6, borderLeftColor: n.read ? colors.border : colors.indigo }}>
             <Text onPress={() => !n.read && read.mutate(n.id)} style={{ fontWeight: n.read ? "700" : "900", color: colors.text, fontSize: 16 }}>{n.title}</Text>
             {n.message ? <Text style={{ color: colors.text }}>{n.message}</Text> : null}
-            <Muted>{new Date(n.created_at).toLocaleString()}</Muted>
+            <Muted>{fmtDate(n.created_at, { time: true })}</Muted>
           </Card>
         ))}
       </ScrollView>

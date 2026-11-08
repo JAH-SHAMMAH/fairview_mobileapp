@@ -5,7 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { api, isSuperUser } from "../../src/lib/api";
 import { useAuth } from "../../src/lib/auth";
 import { Avatar, Card, Empty, ErrorBox, H1, Loading, Muted, Pill } from "../../src/components/ui";
-import { colors } from "../../src/lib/theme";
+import { colors, fmtDate } from "../../src/lib/theme";
 
 type Tab = "students" | "teachers" | "classes" | "audit";
 const call = (n?: string | null) => n && Linking.openURL(`tel:${n}`);
@@ -76,7 +76,7 @@ export default function School() {
               <Card key={a.id} style={{ gap: 2, paddingVertical: 10 }}>
                 <Text style={{ fontWeight: "800", color: colors.text }}>{String(a.action).replace(/_/g, " ")} · {a.resource_type}</Text>
                 {a.resource_label ? <Text style={{ color: colors.text }}>{a.resource_label}</Text> : null}
-                <Muted>{a.actor_email || "system"} · {a.created_at ? new Date(a.created_at).toLocaleString() : ""}</Muted>
+                <Muted>{a.actor_email || "system"} · {a.created_at ? fmtDate(a.created_at, { time: true }) : ""}</Muted>
               </Card>
             ))}
           </>

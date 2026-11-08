@@ -7,6 +7,11 @@ export function Card({ children, style }: { children: React.ReactNode; style?: S
 }
 export function H1({ children }: { children: React.ReactNode }) { return <Text style={s.h1}>{children}</Text>; }
 export function Muted({ children }: { children: React.ReactNode }) { return <Text style={s.muted}>{children}</Text>; }
+// Label under a number in a narrow stat box: up to two lines, and on phones it
+// shrinks to fit (adjustsFontSizeToFit) rather than breaking a word in half.
+export function StatLabel({ children }: { children: React.ReactNode }) {
+  return <Text style={s.statLabel} numberOfLines={2} adjustsFontSizeToFit minimumFontScale={0.75}>{children}</Text>;
+}
 export function Button({ title, onPress, loading, color = colors.brand, disabled }: { title: string; onPress: () => void; loading?: boolean; color?: string; disabled?: boolean }) {
   return (
     <Pressable onPress={onPress} disabled={loading || disabled} style={({ pressed }) => [s.btn, { backgroundColor: color, opacity: pressed || disabled ? 0.7 : 1 }]}>
@@ -37,6 +42,7 @@ export const s = StyleSheet.create({
   card: { backgroundColor: colors.card, borderRadius: 18, borderWidth: 1, borderColor: colors.border, padding: 16 },
   h1: { fontSize: 26, fontWeight: "900", color: colors.text },
   muted: { fontSize: 14, color: colors.muted },
+  statLabel: { fontSize: 11.5, lineHeight: 14, color: colors.muted, fontWeight: "600" },
   btn: { borderRadius: 14, paddingVertical: 14, paddingHorizontal: 20, alignItems: "center", justifyContent: "center" },
   btnText: { color: "#fff", fontWeight: "800", fontSize: 16 },
   center: { flex: 1, alignItems: "center", justifyContent: "center", padding: 32, gap: 12 },

@@ -118,7 +118,7 @@ export default function ExamRoom() {
         <Card style={{ gap: 6 }}>
           <Muted>{exam?.duration_minutes ? `Time allowed: ${exam.duration_minutes} minutes` : "No time limit"}</Muted>
           {exam?.instructions ? <Text style={{ color: colors.text, fontSize: 15 }}>{strip(exam.instructions)}</Text> : null}
-          <Muted>Once you start, the timer runs and you can't leave until you submit.</Muted>
+          <Muted>Once you start, the timer runs and you can’t leave until you submit.</Muted>
         </Card>
         <Button title="Start exam" onPress={begin} loading={busy} />
         <Button title="Back" color={colors.muted} onPress={() => router.back()} />

@@ -5,7 +5,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "../../src/lib/api";
 import { Button, Card, Empty, ErrorBox, H1, Loading, Muted, Pill } from "../../src/components/ui";
-import { colors } from "../../src/lib/theme";
+import { colors, fmtDate } from "../../src/lib/theme";
 
 interface Exam { id: string; title: string; subject_name?: string | null; duration_minutes?: number; start_time?: string | null; end_time?: string | null; status?: string; max_attempts: number; is_live?: boolean }
 interface Attempt { exam_id: string; status: string; score?: number | null; max_score?: number | null }
@@ -24,7 +24,7 @@ export default function Exams() {
     if (e.max_attempts > 0 && done >= e.max_attempts) return { text: "Completed", color: colors.green };
     if (e.status === "closed") return { text: "Closed", color: colors.muted };
     if (e.status === "draft") return { text: "Not ready", color: colors.muted };
-    if (e.start_time && now < new Date(e.start_time)) return { text: `Opens ${new Date(e.start_time).toLocaleString()}`, color: colors.amber };
+    if (e.start_time && now < new Date(e.start_time)) return { text: `Opens ${fmtDate(e.start_time, { time: true })}`, color: colors.amber };
     if (e.end_time && now > new Date(e.end_time)) return { text: "Ended", color: colors.muted };
     return { text: "Open", color: colors.indigo };
   };

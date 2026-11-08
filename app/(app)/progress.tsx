@@ -2,8 +2,8 @@ import { RefreshControl, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "../../src/lib/api";
-import { Card, Empty, ErrorBox, H1, Loading, Muted, Pill } from "../../src/components/ui";
-import { colors } from "../../src/lib/theme";
+import { Card, Empty, ErrorBox, H1, Loading, Muted, Pill, StatLabel } from "../../src/components/ui";
+import { colors, fmtDate } from "../../src/lib/theme";
 
 interface Progress {
   overall: { taken: number; average: number | null; best: number | null; pending_results: number; trend: number[] };
@@ -24,9 +24,9 @@ export default function ProgressScreen() {
       <ScrollView contentContainerStyle={{ padding: 18, gap: 14, paddingBottom: 40 }} refreshControl={<RefreshControl refreshing={false} onRefresh={() => { q.refetch(); }} />}>
         <H1>My progress</H1>
         <View style={{ flexDirection: "row", gap: 12 }}>
-          <Card style={{ flex: 1 }}><Text style={{ fontSize: 26, fontWeight: "900", color: pctColor(overall.average) }}>{overall.average == null ? "–" : `${Math.round(overall.average)}%`}</Text><Muted>Average</Muted></Card>
-          <Card style={{ flex: 1 }}><Text style={{ fontSize: 26, fontWeight: "900", color: colors.text }}>{overall.taken}</Text><Muted>Taken</Muted></Card>
-          <Card style={{ flex: 1 }}><Text style={{ fontSize: 26, fontWeight: "900", color: colors.green }}>{overall.best == null ? "–" : `${Math.round(overall.best)}%`}</Text><Muted>Best</Muted></Card>
+          <Card style={{ flex: 1, padding: 12 }}><Text style={{ fontSize: 24, fontWeight: "900", color: pctColor(overall.average) }}>{overall.average == null ? "–" : `${Math.round(overall.average)}%`}</Text><StatLabel>Average</StatLabel></Card>
+          <Card style={{ flex: 1, padding: 12 }}><Text style={{ fontSize: 24, fontWeight: "900", color: colors.text }}>{overall.taken}</Text><StatLabel>Taken</StatLabel></Card>
+          <Card style={{ flex: 1, padding: 12 }}><Text style={{ fontSize: 24, fontWeight: "900", color: colors.green }}>{overall.best == null ? "–" : `${Math.round(overall.best)}%`}</Text><StatLabel>Best</StatLabel></Card>
         </View>
 
         {trend.length > 1 && (
@@ -55,7 +55,7 @@ export default function ProgressScreen() {
         {recent.length === 0 ? <Empty title="No results yet" sub="Finish an exam or practice test to see it here." /> : recent.map((r) => (
           <Card key={r.attempt_id} style={{ gap: 6 }}>
             <Text style={{ fontWeight: "900", color: colors.text }}>{r.title}</Text>
-            <Muted>{[r.subject_name, r.submitted_at ? new Date(r.submitted_at).toLocaleDateString() : null].filter(Boolean).join(" · ")}</Muted>
+            <Muted>{[r.subject_name, r.submitted_at ? fmtDate(r.submitted_at) : null].filter(Boolean).join(" · ")}</Muted>
             {r.pending ? <Pill text="Result pending" color={colors.amber} /> : <Pill text={`${r.score ?? 0}/${r.max_score ?? 0} · ${Math.round(r.percentage ?? 0)}%`} color={pctColor(r.percentage)} />}
           </Card>
         ))}

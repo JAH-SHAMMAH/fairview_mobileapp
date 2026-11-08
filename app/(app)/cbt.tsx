@@ -4,7 +4,7 @@ import { useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api, errorText } from "../../src/lib/api";
-import { Button, Card, Empty, ErrorBox, H1, Loading, Muted, Pill } from "../../src/components/ui";
+import { Button, Card, Empty, ErrorBox, H1, Loading, Muted, Pill, StatLabel } from "../../src/components/ui";
 import { colors } from "../../src/lib/theme";
 
 interface Exam { id: string; title: string; subject_name?: string | null; class_name?: string | null; status?: string; exam_type?: string; hold_results?: boolean }
@@ -30,9 +30,9 @@ function ResultsView({ id }: { id: string }) {
   return (
     <View style={{ gap: 10 }}>
       <View style={{ flexDirection: "row", gap: 8 }}>
-        <Card style={{ flex: 1, padding: 10 }}><Text style={{ fontWeight: "900", fontSize: 20, color: colors.text }}>{stats.completed}</Text><Muted>Done</Muted></Card>
-        <Card style={{ flex: 1, padding: 10 }}><Text style={{ fontWeight: "900", fontSize: 20, color: colors.text }}>{stats.average}</Text><Muted>Average</Muted></Card>
-        <Card style={{ flex: 1, padding: 10 }}><Text style={{ fontWeight: "900", fontSize: 20, color: colors.green }}>{stats.pass_rate}%</Text><Muted>Passed</Muted></Card>
+        <Card style={{ flex: 1, padding: 10 }}><Text style={{ fontWeight: "900", fontSize: 20, color: colors.text }}>{stats.completed}</Text><StatLabel>Done</StatLabel></Card>
+        <Card style={{ flex: 1, padding: 10 }}><Text style={{ fontWeight: "900", fontSize: 20, color: colors.text }}>{stats.average}</Text><StatLabel>Average</StatLabel></Card>
+        <Card style={{ flex: 1, padding: 10 }}><Text style={{ fontWeight: "900", fontSize: 20, color: colors.green }}>{stats.pass_rate}%</Text><StatLabel>Passed</StatLabel></Card>
       </View>
       {stats.pending_review > 0 && <Muted>{stats.pending_review} attempt(s) have written answers to mark. Tap a name to mark.</Muted>}
       {held && <Button title="Release results to students" color={colors.indigo} loading={publish.isPending} onPress={() => Alert.alert("Release results?", "Students and parents will see the scores.", [{ text: "Cancel", style: "cancel" }, { text: "Release", onPress: () => publish.mutate() }])} />}
