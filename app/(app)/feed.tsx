@@ -6,6 +6,7 @@ import { api, errorText, isSuperUser } from "../../src/lib/api";
 import { useAuth } from "../../src/lib/auth";
 import { Avatar, Button, Card, Empty, ErrorBox, H1, Loading, Muted } from "../../src/components/ui";
 import { colors } from "../../src/lib/theme";
+import { confirmAction } from "../../src/lib/confirm";
 
 interface Post { id: string; user_id: string; author_name?: string | null; content?: string | null; like_count: number; comment_count: number; liked_by_me: boolean; created_at: string }
 const ago = (iso: string) => { const m = Math.max(1, Math.round((Date.now() - new Date(iso).getTime()) / 60000)); return m < 60 ? `${m}m` : m < 1440 ? `${Math.round(m / 60)}h` : `${Math.round(m / 1440)}d`; };
@@ -36,7 +37,7 @@ export default function Feed() {
             <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
               <Avatar name={p.author_name || "?"} size={40} />
               <View style={{ flex: 1 }}><Text style={{ fontWeight: "900", color: colors.text }}>{p.author_name || "School"}</Text><Muted>{ago(p.created_at)} ago</Muted></View>
-              {canDelete(p) ? <Text onPress={() => Alert.alert("Delete post?", "This removes it for everyone.", [{ text: "Cancel", style: "cancel" }, { text: "Delete", style: "destructive", onPress: () => del.mutate(p.id) }])} style={{ color: colors.red, fontWeight: "800" }}>Delete</Text> : null}
+              {canDelete(p) ? <Text onPress={async () => { if (await confirmAction("Delete post?", "This removes it for everyone.", "Delete", true)) del.mutate(p.id); }} style={{ color: colors.red, fontWeight: "800" }}>Delete</Text> : null}
             </View>
             {p.content ? <Text style={{ fontSize: 16, color: colors.text, lineHeight: 23 }}>{p.content}</Text> : null}
             <View style={{ flexDirection: "row", gap: 18 }}>

@@ -2,6 +2,7 @@ import React, { createContext, useCallback, useContext, useEffect, useState } fr
 import { useQueryClient } from "@tanstack/react-query";
 import type { AxiosError } from "axios";
 import { api, errorText, setSignedOutHandler, tokens, Me } from "./api";
+import { registerForPush, unregisterPush } from "./push";
 
 interface AuthState {
   me: Me | null;
@@ -9,6 +10,8 @@ interface AuthState {
   /** Set when the saved session could not be checked (server asleep, no signal). */
   bootError: string | null;
   retry: () => void;
+  /** Re-read the signed-in person (after a password change, say). */
+  refreshMe: () => Promise<void>;
   signIn: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
 }
@@ -21,6 +24,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const qc = useQueryClient();
 
   const signOut = useCallback(async () => {
+    await unregisterPush();
     try { await api.post("/auth/logout"); } catch {}
     await tokens.clear();
     qc.clear();
@@ -58,6 +62,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     restore();
   }, [restore]);
 
+  // Once someone is signed in, turn on phone alerts for them (asks permission once).
+  const meId = me?.id;
+  useEffect(() => { if (meId) registerForPush(); }, [meId]);
+
+  const refreshMe = useCallback(async () => {
+    setMe((await api.get("/auth/me")).data);
+  }, []);
+
   const signIn = useCallback(async (email: string, password: string) => {
     setBootError(null);
     const r = await api.post("/auth/login", { email: email.trim().toLowerCase(), password });
@@ -66,7 +78,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setMe(r.data.user);
   }, [qc]);
 
-  return <Ctx.Provider value={{ me, loading, bootError, retry, signIn, signOut }}>{children}</Ctx.Provider>;
+  return <Ctx.Provider value={{ me, loading, bootError, retry, refreshMe, signIn, signOut }}>{children}</Ctx.Provider>;
 }
 
 export function useAuth() {

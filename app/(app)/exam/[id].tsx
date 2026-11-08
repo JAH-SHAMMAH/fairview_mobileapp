@@ -6,6 +6,10 @@ import { useQueryClient } from "@tanstack/react-query";
 import { api, errorText } from "../../../src/lib/api";
 import { Button, Card, ErrorBox, Loading, Muted } from "../../../src/components/ui";
 import { colors } from "../../../src/lib/theme";
+import * as DocumentPicker from "expo-document-picker";
+import * as ImagePicker from "expo-image-picker";
+import { checkAnswerFile, PickedFile, uploadExamAnswer } from "../../../src/lib/upload";
+import { confirmAction } from "../../../src/lib/confirm";
 
 type Opt = { key: string; text: string } | string;
 interface Q { id: string; question_text: string; question_type: string; options?: Opt[] | null; points: number; answer_type?: string }
@@ -31,6 +35,8 @@ export default function ExamRoom() {
   const [left, setLeft] = useState<number | null>(null);
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState<Attempt | null>(null);
+  const [files, setFiles] = useState<Record<string, string>>({}); // question id -> file name shown
+  const [uploading, setUploading] = useState<string | null>(null);
   const deadline = useRef<number | null>(null);
   const submitted = useRef(false);
 
@@ -83,6 +89,38 @@ export default function ExamRoom() {
     try { setReview((await api.get(`/cbt/practice/attempts/${result.id}/review`)).data.items); setStage("review"); }
     catch (err) { Alert.alert("Review unavailable", errorText(err)); }
     setBusy(false);
+  };
+
+  const attach = async (qid: string, f: PickedFile) => {
+    const bad = checkAnswerFile(f);
+    if (bad) { Alert.alert("Can't use this file", bad); return; }
+    setUploading(qid);
+    try {
+      const { url } = await uploadExamAnswer(f);
+      setAnswers((a) => ({ ...a, [qid]: url }));
+      setFiles((m) => ({ ...m, [qid]: f.name }));
+    } catch (err: any) {
+      Alert.alert("Upload failed", err?.message || "Check your connection and try again.");
+    }
+    setUploading(null);
+  };
+
+  const takePhoto = async (qid: string) => {
+    const perm = await ImagePicker.requestCameraPermissionsAsync();
+    if (!perm.granted) { Alert.alert("Camera blocked", "Allow camera access in your phone's settings, or choose a file instead."); return; }
+    const r = await ImagePicker.launchCameraAsync({ mediaTypes: ["images"], quality: 0.7 });
+    const a = r.canceled ? null : r.assets?.[0];
+    if (a) await attach(qid, { uri: a.uri, name: a.fileName || `answer-${Date.now()}.jpg`, mimeType: a.mimeType || "image/jpeg", size: a.fileSize, file: (a as any).file });
+  };
+
+  const chooseFile = async (qid: string) => {
+    const r = await DocumentPicker.getDocumentAsync({
+      type: ["application/pdf", "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document", "text/plain", "image/*"],
+      copyToCacheDirectory: true,
+      multiple: false,
+    });
+    const a = r.canceled ? null : r.assets?.[0];
+    if (a) await attach(qid, { uri: a.uri, name: a.name, mimeType: a.mimeType, size: a.size, file: a.file });
   };
 
   // countdown against the server deadline
@@ -141,6 +179,7 @@ export default function ExamRoom() {
   if (stage === "review") {
     const label = (it: (typeof review)[number], key: string | null) => {
       if (!key) return "No answer";
+      if (/^(https?:\/\/|\/uploads?\/)/.test(key)) return "File attached";
       const o = (it.options ?? []).map(ok).find((x) => x.key === key);
       return o ? `${key.toUpperCase()}. ${strip(o.text)}` : key;
     };
@@ -191,7 +230,19 @@ export default function ExamRoom() {
         })}
         {(type === "short_answer" || type === "long_answer") && (
           q.answer_type === "file"
-            ? <Card><Muted>This question needs a file upload. Please answer it in the web portal.</Muted></Card>
+            ? (
+              <Card style={{ gap: 10 }}>
+                <Muted>Answer with a photo of your work or a file (PDF, Word, text or photo, up to 15 MB).</Muted>
+                {answers[q.id]
+                  ? <Text style={st.attached} numberOfLines={2}>✓ Attached: {files[q.id] || "your file"}</Text>
+                  : null}
+                <Button title={answers[q.id] ? "Retake photo" : "Take a photo"} color={colors.indigo} loading={uploading === q.id} disabled={!!uploading} onPress={() => takePhoto(q.id)} />
+                <Button title={answers[q.id] ? "Choose a different file" : "Choose a file"} color={colors.brandSoft} disabled={!!uploading} onPress={() => chooseFile(q.id)} />
+                {answers[q.id]
+                  ? <Button title="Remove" color={colors.muted} disabled={!!uploading} onPress={() => { setAnswers((a) => { const n = { ...a }; delete n[q.id]; return n; }); setFiles((m) => { const n = { ...m }; delete n[q.id]; return n; }); }} />
+                  : null}
+              </Card>
+            )
             : <TextInput multiline value={answers[q.id] ?? ""} onChangeText={(t) => setAnswers((a) => ({ ...a, [q.id]: t }))} placeholder="Type your answer" placeholderTextColor="#9AA5A0" style={st.input} textAlignVertical="top" />
         )}
       </ScrollView>
@@ -200,7 +251,7 @@ export default function ExamRoom() {
         <View style={{ flex: 1 }}>
           {i < qs.length - 1
             ? <Button title="Next" onPress={() => setI(i + 1)} />
-            : <Button title="Submit" color={colors.green} loading={busy} onPress={() => Alert.alert("Submit exam?", `You answered ${answered} of ${qs.length} questions.`, [{ text: "Keep going", style: "cancel" }, { text: "Submit", onPress: () => submit() }])} />}
+            : <Button title="Submit" color={colors.green} loading={busy} onPress={async () => { if (await confirmAction("Submit exam?", `You answered ${answered} of ${qs.length} questions.`, "Submit")) submit(); }} />}
         </View>
       </View>
     </SafeAreaView>
@@ -217,5 +268,6 @@ const st = StyleSheet.create({
   optKey: { fontWeight: "900", color: colors.indigo, width: 22 },
   optText: { flex: 1, fontSize: 16, color: colors.text },
   input: { minHeight: 140, backgroundColor: "#fff", borderRadius: 14, borderWidth: 1, borderColor: colors.border, padding: 14, fontSize: 16, color: colors.text },
+  attached: { color: colors.green, fontWeight: "800", fontSize: 15 },
   nav: { flexDirection: "row", gap: 10, padding: 14, backgroundColor: "#fff", borderTopWidth: 1, borderTopColor: colors.border },
 });

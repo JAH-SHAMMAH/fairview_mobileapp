@@ -6,6 +6,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api, errorText } from "../../src/lib/api";
 import { Button, Card, Empty, ErrorBox, H1, Loading, Muted, Pill, StatLabel } from "../../src/components/ui";
 import { colors } from "../../src/lib/theme";
+import { confirmAction } from "../../src/lib/confirm";
 
 interface Exam { id: string; title: string; subject_name?: string | null; class_name?: string | null; status?: string; exam_type?: string; hold_results?: boolean }
 interface Results {
@@ -35,7 +36,7 @@ function ResultsView({ id }: { id: string }) {
         <Card style={{ flex: 1, padding: 10 }}><Text style={{ fontWeight: "900", fontSize: 20, color: colors.green }}>{stats.pass_rate}%</Text><StatLabel>Passed</StatLabel></Card>
       </View>
       {stats.pending_review > 0 && <Muted>{stats.pending_review} attempt(s) have written answers to mark. Tap a name to mark.</Muted>}
-      {held && <Button title="Release results to students" color={colors.indigo} loading={publish.isPending} onPress={() => Alert.alert("Release results?", "Students and parents will see the scores.", [{ text: "Cancel", style: "cancel" }, { text: "Release", onPress: () => publish.mutate() }])} />}
+      {held && <Button title="Release results to students" color={colors.indigo} loading={publish.isPending} onPress={async () => { if (await confirmAction("Release results?", "Students and parents will see the scores.", "Release")) publish.mutate(); }} />}
       {attempts.filter((a) => !a.superseded).map((a) => (
         <View key={a.id} style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", paddingVertical: 4, gap: 8 }}>
           <Text onPress={() => a.status !== "in_progress" && router.push({ pathname: "/remark/[id]", params: { id: a.id } })} style={{ flex: 1, color: a.needs_review ? colors.amber : colors.text, fontWeight: "700" }}>{a.student_name || "Student"}{a.needs_review ? "  · mark ›" : "  ›"}</Text>

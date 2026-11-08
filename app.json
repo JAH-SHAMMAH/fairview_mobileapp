@@ -34,6 +34,22 @@
           "backgroundColor": "#0E3B2C",
           "imageWidth": 200
         }
+      ],
+      "expo-sharing",
+      [
+        "expo-notifications",
+        {
+          "color": "#0E3B2C",
+          "defaultChannel": "default"
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Fairview needs your photos so you can attach a picture of your work as an exam answer.",
+          "cameraPermission": "Fairview needs the camera so you can take a photo of your work as an exam answer.",
+          "microphonePermission": false
+        }
       ]
     ],
     "newArchEnabled": true,

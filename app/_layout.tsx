@@ -2,11 +2,15 @@ import { useEffect } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Slot, useRouter, useSegments } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import { View } from "react-native";
+import { Platform, View } from "react-native";
+import * as Notifications from "expo-notifications";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { AuthProvider, useAuth } from "../src/lib/auth";
 import { Button, ErrorBox, Loading } from "../src/components/ui";
+import { configureForeground, routeForAlert } from "../src/lib/push";
+
+configureForeground();
 
 const queryClient = new QueryClient({ defaultOptions: { queries: { retry: 1, refetchOnWindowFocus: false } } });
 
@@ -17,9 +21,25 @@ function Guard() {
   useEffect(() => {
     if (loading || bootError) return;
     const onLogin = segments[0] === "login";
+    const onChange = segments[0] === "change-password";
     if (!me && !onLogin) router.replace("/login");
+    else if (me && me.force_password_change && !onChange) router.replace("/change-password");
     else if (me && onLogin) router.replace("/");
   }, [me, loading, bootError, segments, router]);
+
+  // Tapping a phone alert opens the matching screen.
+  useEffect(() => {
+    if (Platform.OS === "web" || !me) return;
+    const open = (r: Notifications.NotificationResponse | null) => {
+      if (r) router.push(routeForAlert(r.notification.request.content.data) as any);
+    };
+    try {
+      const last = Notifications.getLastNotificationResponse();
+      if (last) { open(last); Notifications.clearLastNotificationResponse(); }
+    } catch {}
+    const sub = Notifications.addNotificationResponseReceivedListener(open);
+    return () => sub.remove();
+  }, [me, router]);
   if (loading) return <Loading />;
   if (bootError && !me) {
     return (

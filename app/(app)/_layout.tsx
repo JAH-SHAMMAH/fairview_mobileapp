@@ -4,6 +4,7 @@ import { Tabs } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { RoleProvider, useRole } from "../../src/lib/role";
 import { colors } from "../../src/lib/theme";
+import { Loading } from "../../src/components/ui";
 
 type IconName = React.ComponentProps<typeof Ionicons>["name"];
 const icon = (n: IconName, nf: IconName) => {
@@ -15,8 +16,14 @@ const TabLabel = ({ color, children }: { color: ColorValue | null; children: str
   <Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8} style={{ color: color ?? undefined, fontWeight: "700", fontSize: 10, letterSpacing: -0.1 }}>{children}</Text>
 );
 
+// Screens reached from inside the app (an exam, a report, user admin...) that
+// should never show a button in the tab bar. Not `href: null`: since expo-router
+// 58 that marks the route hidden and redirects anyone landing on it to the first
+// tab, so every one of these screens bounced straight back to Home.
+const SCREEN_ONLY = { tabBarButton: () => null, tabBarItemStyle: { display: "none" as const }, tabBarStyle: { display: "none" as const } };
+
 function TabsByRole() {
-  const { role } = useRole();
+  const { role, isLoading } = useRole();
   const parent = role === "parent";
   const student = role === "student";
   const admin = role === "admin";
@@ -27,6 +34,10 @@ function TabsByRole() {
   // so six tabs fit a 360-375pt phone without "Attendance" being cut to "Atte...".
   const { bottom } = useSafeAreaInsets();
   const padBottom = Math.max(bottom, 10);
+  // Wait for the role before building the tabs: a role tab (Children, School...)
+  // is hidden until then, and expo-router sends anyone focused on a hidden tab to
+  // Home, so opening the app from an attendance alert landed on Home, not Children.
+  if (isLoading) return <Loading />;
   return (
     <Tabs screenOptions={{ headerShown: false, tabBarActiveTintColor: colors.brand, tabBarInactiveTintColor: colors.muted, tabBarStyle: { backgroundColor: "#fff", borderTopColor: colors.border, height: 58 + padBottom, paddingBottom: padBottom, paddingTop: 6 }, tabBarLabel: TabLabel, tabBarItemStyle: { paddingHorizontal: 0 } }}>
       <Tabs.Screen name="index" options={{ title: "Home", tabBarIcon: icon("home", "home-outline") }} />
@@ -39,12 +50,16 @@ function TabsByRole() {
       <Tabs.Screen name="school" options={{ title: "School", href: admin ? undefined : null, tabBarIcon: icon("school", "school-outline") }} />
       <Tabs.Screen name="feed" options={{ title: "Feed", tabBarIcon: icon("newspaper", "newspaper-outline") }} />
       <Tabs.Screen name="notices" options={{ title: "Notices", tabBarIcon: icon("notifications", "notifications-outline") }} />
-      <Tabs.Screen name="remark/[id]" options={{ href: null, tabBarStyle: { display: "none" } }} />
-      <Tabs.Screen name="entry" options={{ href: null, tabBarStyle: { display: "none" } }} />
-      <Tabs.Screen name="practice" options={{ href: null, tabBarStyle: { display: "none" } }} />
-      <Tabs.Screen name="exam/[id]" options={{ href: null, tabBarStyle: { display: "none" } }} />
-      <Tabs.Screen name="report/[id]" options={{ href: null, tabBarStyle: { display: "none" } }} />
-      <Tabs.Screen name="attendance/[id]" options={{ href: null, tabBarStyle: { display: "none" } }} />
+      <Tabs.Screen name="remark/[id]" options={SCREEN_ONLY} />
+      <Tabs.Screen name="entry" options={SCREEN_ONLY} />
+      <Tabs.Screen name="practice" options={SCREEN_ONLY} />
+      <Tabs.Screen name="exam/[id]" options={SCREEN_ONLY} />
+      <Tabs.Screen name="report/[id]" options={SCREEN_ONLY} />
+      <Tabs.Screen name="attendance/[id]" options={SCREEN_ONLY} />
+      <Tabs.Screen name="users/index" options={SCREEN_ONLY} />
+      <Tabs.Screen name="users/[id]" options={SCREEN_ONLY} />
+      <Tabs.Screen name="users/new" options={SCREEN_ONLY} />
+      <Tabs.Screen name="backup" options={SCREEN_ONLY} />
       <Tabs.Screen name="account" options={{ title: "Account", tabBarIcon: icon("person-circle", "person-circle-outline") }} />
     </Tabs>
   );
